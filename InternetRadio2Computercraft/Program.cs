@@ -10,7 +10,8 @@ namespace InternetRadio2Computercraft
         static async Task Main(string[] args)
         {
             HttpListener listener = new HttpListener();
-            listener.Prefixes.Add("http://10.0.0.2:2468/");
+            
+            listener.Prefixes.Add("http://*:2468/");
             listener.Start();
             Console.WriteLine("Server started, listening on port 2468...");
 
