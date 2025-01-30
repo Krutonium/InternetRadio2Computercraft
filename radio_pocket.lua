@@ -17,6 +17,7 @@ local stations = {
     { name = ".977 Today's Hits", url = "https://15113.live.streamtheworld.com/977_HITSAAC_SC"},
     { name = "Chirp", url = "http://stream.rtmp.ca/hls/chirper.m3u8"},
     { name = "NeuroSama", url = "https://www.youtube.com/watch?v=thCiTnOzkOM"},
+    { name = "Kitboga", url = "https://www.twitch.tv/kitboga"},
 }
 
 
@@ -128,12 +129,12 @@ local function startRadio(stationUrl)
 end
 
 local mainFrame = basalt.createFrame()
-local list = mainFrame:addList():setPosition(2,2):setSize(24,10)
+local list = mainFrame:addList():setPosition(2,2):setSize(24,14)
 for _, s in ipairs(stations) do
     list:addItem(s.name)
 end
 
-local toggleBtn = mainFrame:addButton():setPosition(2,16):setSize(10,3):setText("Start")
+local toggleBtn = mainFrame:addButton():setPosition(2,17):setSize(10,3):setText("Start")
 toggleBtn:onClick(function()
     if running then
         toggleBtn:setText("Start")
