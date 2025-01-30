@@ -65,23 +65,14 @@ namespace InternetRadio2Computercraft
             {
                 using (var ytdlp = new Process())
                 {
-                    ytdlp.StartInfo.FileName = "yt-dlp";
-                    ytdlp.StartInfo.Arguments = $"{url} -o -";
-                    ytdlp.StartInfo.RedirectStandardOutput = true;
-                    ytdlp.StartInfo.UseShellExecute = false;
-                    ytdlp.StartInfo.CreateNoWindow = true;
-                    
-                    
+
                     // Adjusted to use yt-dlp in front of ffmpeg
-                    ffmpeg.StartInfo.FileName = "ffmpeg";
-                    ffmpeg.StartInfo.Arguments = $"-i - -f dfpwm -ar 48000 -ac 1 -vn pipe:1";
+                    ffmpeg.StartInfo.FileName = "./encode.sh";
+                    ffmpeg.StartInfo.Arguments = $"\"{url}\"";
                     ffmpeg.StartInfo.RedirectStandardOutput = true;
                     ffmpeg.StartInfo.UseShellExecute = false;
                     ffmpeg.StartInfo.CreateNoWindow = true;
 
-                    ffmpeg.Start();
-                    ytdlp.Start();
-                    var copyTask = ytdlp.StandardOutput.BaseStream.CopyToAsync(ffmpeg.StandardInput.BaseStream);
 
                     try
                     {
