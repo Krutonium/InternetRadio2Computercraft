@@ -129,10 +129,12 @@ namespace InternetRadio2Computercraft
                     {
                         Console.WriteLine($"WebSocket exception: {wsEx.Message}");
                         // Handle connection closure or cleanup
+                        ffmpeg.Kill(true);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error streaming audio: {ex.Message}");
+                        ffmpeg.Kill(true);
                     }
                     finally
                     {
