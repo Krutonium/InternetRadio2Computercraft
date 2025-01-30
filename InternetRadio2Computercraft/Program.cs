@@ -140,7 +140,7 @@ namespace InternetRadio2Computercraft
                     {
                         if (!ffmpeg.HasExited)
                         {
-                            ffmpeg.Kill();
+                            ffmpeg.Kill(true);
                         }
 
                         ffmpeg.WaitForExit();
