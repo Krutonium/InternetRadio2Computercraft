@@ -1,4 +1,4 @@
-{ lib, buildDotnetModule, dotnetCorePackages, ffmpeg}:
+{ lib, buildDotnetModule, dotnetCorePackages, ffmpeg, yt-dlp }:
 
 buildDotnetModule rec {
   pname = "InternetRadio2Computercraft";
