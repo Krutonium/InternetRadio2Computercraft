@@ -1,7 +1,17 @@
 # Setup
 
-1. You must either host the C# server off your LAN, or add an exception for it to your computercraft config (in /world/serverconfig/)
-2. Edit the script to point at your C# server instance. It runs by default on port 2468.
-3. Note that only the *server* needs to be able to see it - Clients will be handled by computercraft/minecraft itself.
+1. **Server Hosting**:
+    - Host the C# server either off your LAN or add an exception for it in your Computercraft config (located in `/world/serverconfig/`).
 
-For Nix Users, you can run the server by just doing `nix flake github:Krutonium/InternetRadio2Computercraft`
+2. **Script Configuration**:
+    - Edit the script to point to your C# server instance. The server runs on port 2468 by default.
+
+3. **Network Visibility**:
+   - Ensure that only the *server* is able to be able to see the C# server. Clients will be handled by Computercraft/Minecraft itself.
+     - I'd suggest a firewall rule that restricts incoming connections.
+
+4. **Running the Server on Nix**:
+    - For Nix users, you can run the server with the following command:
+    ```sh
+    nix flake github:Krutonium/InternetRadio2Computercraft
+    ```
