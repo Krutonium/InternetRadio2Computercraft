@@ -20,5 +20,5 @@ if [ "$#" -ne 1 ]; then
 fi
 
 # Fetch the URL
-yt-dlp -o - "$1" | ffmpeg -i pipe:0 -f dfpwm -ar 48000 -ac 1 -vn pipe:1
+yt-dlp -x -o - "$1" | ffmpeg -i pipe:0 -f dfpwm -ar 48000 -ac 1 -vn pipe:1
  
