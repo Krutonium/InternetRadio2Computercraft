@@ -73,7 +73,7 @@ namespace InternetRadio2Computercraft
                     ffmpeg.StartInfo.UseShellExecute = false;
                     ffmpeg.StartInfo.CreateNoWindow = true;
 
-
+                    ffmpeg.Start();
                     try
                     {
                         var ffmpegOutput = ffmpeg.StandardOutput.BaseStream;
