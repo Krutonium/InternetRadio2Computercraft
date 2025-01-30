@@ -63,42 +63,68 @@ namespace InternetRadio2Computercraft
 
             using (var ffmpeg = new Process())
             {
-                // Adjusted to use yt-dlp in front of ffmpeg
-                ffmpeg.StartInfo.FileName = "yt-dlp";
-                ffmpeg.StartInfo.Arguments = $"-o - | ffmpeg -i - -f dfpwm -ar 48000 -ac 1 -vn pipe:1";
-                ffmpeg.StartInfo.RedirectStandardOutput = true;
-                ffmpeg.StartInfo.UseShellExecute = false;
-                ffmpeg.StartInfo.CreateNoWindow = true;
-
-                ffmpeg.Start();
-
-                try
+                using (var ytdlp = new Process())
                 {
-                    var ffmpegOutput = ffmpeg.StandardOutput.BaseStream;
-                    var sendBuffer = new byte[4096];
-                    int bytesRead;
-                    int totalBytesRead = 0;
+                    ytdlp.StartInfo.FileName = "yt-dlp";
+                    ytdlp.StartInfo.Arguments = $"{url} -o -";
+                    ytdlp.StartInfo.RedirectStandardOutput = true;
+                    ytdlp.StartInfo.UseShellExecute = false;
+                    ytdlp.StartInfo.CreateNoWindow = true;
+                    
+                    
+                    // Adjusted to use yt-dlp in front of ffmpeg
+                    ffmpeg.StartInfo.FileName = "ffmpeg";
+                    ffmpeg.StartInfo.Arguments = $"-i - -f dfpwm -ar 48000 -ac 1 -vn pipe:1";
+                    ffmpeg.StartInfo.RedirectStandardOutput = true;
+                    ffmpeg.StartInfo.UseShellExecute = false;
+                    ffmpeg.StartInfo.CreateNoWindow = true;
 
-                    // Calculate the delay to maintain 48kbps (6KBps)
-                    int targetBytesPerSecond = 6000;
-                    int bufferSize = 4096;
-                    double delayPerBuffer = (double)bufferSize / targetBytesPerSecond * 1000;
+                    ffmpeg.Start();
+                    ytdlp.Start();
+                    var copyTask = ytdlp.StandardOutput.BaseStream.CopyToAsync(ffmpeg.StandardInput.BaseStream);
 
-
-                    while ((bytesRead = await ffmpegOutput.ReadAsync(sendBuffer, totalBytesRead,
-                               sendBuffer.Length - totalBytesRead)) > 0)
+                    try
                     {
-                        totalBytesRead += bytesRead;
+                        var ffmpegOutput = ffmpeg.StandardOutput.BaseStream;
+                        
+                        var sendBuffer = new byte[4096];
+                        int bytesRead;
+                        int totalBytesRead = 0;
 
-                        // Check if WebSocket is still open
-                        if (webSocket.State != WebSocketState.Open)
+                        // Calculate the delay to maintain 48kbps (6KBps)
+                        int targetBytesPerSecond = 6000;
+                        int bufferSize = 4096;
+                        double delayPerBuffer = (double)bufferSize / targetBytesPerSecond * 1000;
+
+
+                        while ((bytesRead = await ffmpegOutput.ReadAsync(sendBuffer, totalBytesRead,
+                                   sendBuffer.Length - totalBytesRead)) > 0)
                         {
-                            Console.WriteLine("WebSocket disconnected.");
-                            break;
+                            totalBytesRead += bytesRead;
+
+                            // Check if WebSocket is still open
+                            if (webSocket.State != WebSocketState.Open)
+                            {
+                                Console.WriteLine("WebSocket disconnected.");
+                                break;
+                            }
+
+                            // Send data if buffer is full
+                            if (totalBytesRead >= 4096)
+                            {
+                                await webSocket.SendAsync(
+                                    new ArraySegment<byte>(sendBuffer, 0, totalBytesRead),
+                                    WebSocketMessageType.Binary,
+                                    endOfMessage: true,
+                                    CancellationToken.None
+                                );
+                                totalBytesRead = 0;
+                                await Task.Delay((int)delayPerBuffer);
+                            }
                         }
 
-                        // Send data if buffer is full
-                        if (totalBytesRead >= 4096)
+                        // Send any remaining data in the buffer
+                        if (totalBytesRead > 0)
                         {
                             await webSocket.SendAsync(
                                 new ArraySegment<byte>(sendBuffer, 0, totalBytesRead),
@@ -106,46 +132,33 @@ namespace InternetRadio2Computercraft
                                 endOfMessage: true,
                                 CancellationToken.None
                             );
-                            totalBytesRead = 0;
-                            await Task.Delay((int)delayPerBuffer);
                         }
                     }
-
-                    // Send any remaining data in the buffer
-                    if (totalBytesRead > 0)
+                    catch (WebSocketException wsEx)
                     {
-                        await webSocket.SendAsync(
-                            new ArraySegment<byte>(sendBuffer, 0, totalBytesRead),
-                            WebSocketMessageType.Binary,
-                            endOfMessage: true,
-                            CancellationToken.None
-                        );
+                        Console.WriteLine($"WebSocket exception: {wsEx.Message}");
+                        // Handle connection closure or cleanup
                     }
-                }
-                catch (WebSocketException wsEx)
-                {
-                    Console.WriteLine($"WebSocket exception: {wsEx.Message}");
-                    // Handle connection closure or cleanup
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error streaming audio: {ex.Message}");
-                }
-                finally
-                {
-                    if (!ffmpeg.HasExited)
+                    catch (Exception ex)
                     {
-                        ffmpeg.Kill();
+                        Console.WriteLine($"Error streaming audio: {ex.Message}");
                     }
-
-                    ffmpeg.WaitForExit();
-                    if (webSocket.State == WebSocketState.Open)
+                    finally
                     {
-                        //await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Streaming ended",
-                        //    CancellationToken.None);
-                    }
+                        if (!ffmpeg.HasExited)
+                        {
+                            ffmpeg.Kill();
+                        }
 
-                    Console.WriteLine("WebSocket connection closed.");
+                        ffmpeg.WaitForExit();
+                        if (webSocket.State == WebSocketState.Open)
+                        {
+                            //await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Streaming ended",
+                            //    CancellationToken.None);
+                        }
+
+                        Console.WriteLine("WebSocket connection closed.");
+                    }
                 }
             }
         }
