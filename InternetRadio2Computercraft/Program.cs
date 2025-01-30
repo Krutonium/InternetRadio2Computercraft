@@ -10,7 +10,7 @@ namespace InternetRadio2Computercraft
         static async Task Main(string[] args)
         {
             HttpListener listener = new HttpListener();
-            
+
             listener.Prefixes.Add("http://*:2468/");
             listener.Start();
             Console.WriteLine("Server started, listening on port 2468...");
@@ -35,9 +35,11 @@ namespace InternetRadio2Computercraft
                 {
                     await writer.WriteAsync("WebSocket connection required.");
                 }
+
                 context.Response.Close();
             }
         }
+
         private static async Task HandleWebSocket(HttpListenerContext context)
         {
             WebSocket webSocket = (await context.AcceptWebSocketAsync(subProtocol: null)).WebSocket;
@@ -61,8 +63,9 @@ namespace InternetRadio2Computercraft
 
             using (var ffmpeg = new Process())
             {
-                ffmpeg.StartInfo.FileName = "ffmpeg";
-                ffmpeg.StartInfo.Arguments = $"-i \"{url}\" -f dfpwm -ar 48000 -ac 1 -vn pipe:1";
+                // Adjusted to use yt-dlp in front of ffmpeg
+                ffmpeg.StartInfo.FileName = "yt-dlp";
+                ffmpeg.StartInfo.Arguments = $"-o - | ffmpeg -i - -f dfpwm -ar 48000 -ac 1 -vn pipe:1";
                 ffmpeg.StartInfo.RedirectStandardOutput = true;
                 ffmpeg.StartInfo.UseShellExecute = false;
                 ffmpeg.StartInfo.CreateNoWindow = true;
@@ -81,7 +84,7 @@ namespace InternetRadio2Computercraft
                     int bufferSize = 4096;
                     double delayPerBuffer = (double)bufferSize / targetBytesPerSecond * 1000;
 
-                    
+
                     while ((bytesRead = await ffmpegOutput.ReadAsync(sendBuffer, totalBytesRead,
                                sendBuffer.Length - totalBytesRead)) > 0)
                     {
@@ -105,7 +108,6 @@ namespace InternetRadio2Computercraft
                             );
                             totalBytesRead = 0;
                             await Task.Delay((int)delayPerBuffer);
-
                         }
                     }
 
