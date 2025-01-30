@@ -60,7 +60,14 @@ This repository contains a C# program that utilizes `ffmpeg` to stream audio to 
 
 3. **Enjoy the Stream**:
     - The audio stream will be processed and sent to your CC:T computer.
+    - Useful Tidbit, the desktop player can handle as many networked speakers as you can connect, so you can have audio throughout your base! And if you hook it up to a stream where you can break into the audio stream, you can use it as PA system.
 
+## Adding Stations
+- Use the URL of the video you want to stream. 
+Example: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+- In the LUA for the radio, find the list of URL's near the top, and include it:
+- `{ name = "Rick Astley - Never Gonna Give You Up", url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },`
+  - It doesn't have to be a video, it can be livestreams, or even direct audio streams.
 ## Troubleshooting
 
 - **Dependencies Not Found**:
@@ -69,6 +76,9 @@ This repository contains a C# program that utilizes `ffmpeg` to stream audio to 
 - **WebSocket Connection Issues**:
     - Verify the server is running and accessible on the correct port.
     - Check for any network issues or firewall settings blocking the connection.
+
+- **There's an error about indexing `w`**:
+    - The Address for your server is incorrect. Make sure it's correct in the LUA script.
 
 ## Contributing
 
