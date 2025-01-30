@@ -11,5 +11,5 @@ buildDotnetModule rec {
   dotnet-runtime = dotnetCorePackages.sdk_9_0;
   dotnetFlags = [ "" ];
   executables = [ "InternetRadio2Computercraft" ];
-  runtimeDeps = [ ffmpeg ];
+  runtimeDeps = [ ffmpeg yt-dlp ];
 }
