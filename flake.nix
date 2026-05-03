@@ -1,9 +1,17 @@
 {
   description = "Internet Radio for ComputerCraft: Tweaked";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-  outputs = { self, nixpkgs }: {
-    defaultPackage.x86_64-linux =
-      with import nixpkgs { system = "x86_64-linux"; };
-      pkgs.callPackage ./package.nix {};
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+  outputs = { self, nixpkgs }:
+    let
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+    in
+    {
+      packages = forAllSystems (system:
+        let pkgs = import nixpkgs { inherit system; };
+        in {
+          default = pkgs.callPackage ./package.nix { };
+        }
+      );
+    };
 }
