@@ -1,4 +1,4 @@
-{ lib, buildDotnetModule, dotnetCorePackages, ffmpeg, yt-dlp }:
+{ lib, buildDotnetModule, dotnetCorePackages, ffmpeg-full, yt-dlp }:
 
 buildDotnetModule rec {
   pname = "InternetRadio2Computercraft";
@@ -11,5 +11,5 @@ buildDotnetModule rec {
   dotnet-runtime = dotnetCorePackages.sdk_9_0;
   dotnetFlags = [ "" ];
   executables = [ "InternetRadio2Computercraft" ];
-  runtimeDeps = [ ffmpeg yt-dlp ];
+  runtimeDeps = [ ffmpeg-full yt-dlp ];
 }
